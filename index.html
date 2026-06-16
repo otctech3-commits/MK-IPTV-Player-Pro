@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MK IPTV Player Pro - Free M3U Player</title>
+  <meta name="description" content="Play M3U playlists and M3U8 streams. Audio switching, VLC mode, multiple players.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video-js.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container">
+      <div class="logo"><i class="fa-solid fa-tv"></i> MK<span>IPTV</span> PRO</div>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="showAddPlaylist()"><i class="fa-solid fa-plus"></i> Add Playlist</button>
+        <button class="btn-icon" onclick="showSettings()"><i class="fa-solid fa-gear"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="app-layout">
+    <!-- SIDEBAR - CHANNELS -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="searchChannel" placeholder="Search channels..." oninput="searchChannels()">
+        </div>
+      </div>
+      
+      <div class="playlist-tabs" id="playlistTabs">
+        <button class="playlist-tab active" onclick="switchPlaylist('default')">
+          <i class="fa-solid fa-list"></i> Default
+        </button>
+      </div>
+
+      <div class="channels-list" id="channelsList">
+        <div class="empty-state">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <p>No channels loaded</p>
+          <button class="btn-primary" onclick="showAddPlaylist()">Add M3U Playlist</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PLAYER SECTION -->
+    <main class="player-section">
+      <div class="player-wrapper">
+        <div class="player-container">
+          <video id="videoPlayer" class="video-js vjs-default-skin" controls preload="auto">
+            <p class="vjs-no-js">Enable JavaScript to watch video</p>
+          </video>
+          
+          <div class="player-overlay" id="playerOverlay">
+            <div class="overlay-content">
+              <i class="fa-solid fa-tv"></i>
+              <h3>Select a channel to start</h3>
+              <p>Load M3U playlist from sidebar</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYER CONTROLS -->
+        <div class="player-controls">
+          <div class="control-left">
+            <div class="channel-info" id="channelInfo" style="display:none">
+              <img id="channelLogo" src="" alt="">
+              <div>
+                <div class="channel-name" id="channelName">Channel Name</div>
+                <div class="channel-status" id="channelStatus"><i class="fa-solid fa-circle"></i> Live</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="control-right">
+            <div class="control-group">
+              <label><i class="fa-solid fa-volume-high"></i> Audio</label>
+              <select id="audioTrack" onchange="changeAudioTrack()">
+                <option value="-1">Default</option>
+              </select>
+            </div>
+            
+            <div class="control-group">
+              <label><i class="fa-solid fa-display"></i> Player</label>
+              <select id="playerMode" onchange="changePlayerMode()">
+                <option value="browser">Browser HLS</option>
+                <option value="vlc-like">VLC Mode</option>
+                <option value="external">External Player</option>
+              </select>
+            </div>
+
+            <button class="btn-vlc" onclick="openInVLC()" id="vlcBtn" style="display:none">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in VLC
+            </button>
+          </div>
+        </div>
+
+        <!-- CHANNEL INFO BAR -->
+        <div class="info-bar" id="infoBar" style="display:none">
+          <div class="info-item">
+            <i class="fa-solid fa-signal"></i>
+            <span>Quality: <b id="videoQuality">Auto</b></span>
+          </div>
+          <div class="info-item">
+            <i class="fa-solid fa-gauge"></i>
+            <span>Buffer: <b id="bufferHealth">Good</b></span>
+          </div>
+          <div class="info-item">
+            <i class="fa-solid fa-clock"></i>
+            <span>Uptime: <b id="uptime">00:00</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT CHANNELS -->
+      <div class="recent-section">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Watched</h3>
+        <div id="recentChannels" class="recent-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ADD PLAYLIST MODAL -->
+  <div id="addPlaylistModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add M3U Playlist</h3>
+        <button onclick="closeModal('addPlaylistModal')"><i class="fa-solid fa-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="showAddTab('url')">URL</button>
+          <button class="tab-btn" onclick="showAddTab('file')">Upload File</button>
+          <button class="tab-btn" onclick="showAddTab('single')">Single M3U8</button>
+        </div>
+
+        <!-- URL TAB -->
+        <div id="addTab-url" class="add-tab active">
+          <label>Playlist Name</label>
+          <input type="text" id="playlistName" placeholder="My IPTV">
+          <label>M3U URL</label>
+          <input type="url" id="playlistUrl" placeholder="https://example.com/playlist.m3u">
+          <button class="btn-primary" onclick="addPlaylistByUrl()" style="width:100%;margin-top:20px">
+            <i class="fa-solid fa-plus"></i> Add Playlist
+          </button>
+        </div>
+
+        <!-- FILE TAB -->
+        <div id="addTab-file" class="add-tab">
+          <label>Playlist Name</label>
+          <input type="text" id="filePlaylistName" placeholder="My IPTV">
+          <div class="upload-area" onclick="document.getElementById('m3uFile').click()">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <p>Click to upload M3U file</p>
+            <span>.m3u,.m3u8 files supported</span>
+            <input type="file" id="m3uFile" accept=".m3u,.m3u8" style="display:none" onchange="handleM3UFile(event)">
+          </div>
+        </div>
+
+        <!-- SINGLE M3U8 TAB -->
+        <div id="addTab-single" class="add-tab">
+          <label>Channel Name</label>
+          <input type="text" id="singleName" placeholder="Channel Name">
+          <label>M3U8 Stream URL</label>
+          <input type="url" id="singleUrl" placeholder="https://example.com/stream.m3u8">
+          <label>Logo URL (Optional)</label>
+          <input type="url" id="singleLogo" placeholder="https://example.com/logo.png">
+          <button class="btn-primary" onclick="addSingleChannel()" style="width:100%;margin-top:20px">
+            <i class="fa-solid fa-plus"></i> Add Channel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Settings</h3>
+        <button onclick="closeModal('settingsModal')"><i class="fa-solid fa-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="autoPlay" checked> Auto-play on channel select
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="saveHistory" checked> Save watch history
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>Default Quality</label>
+          <select id="defaultQuality">
+            <option value="auto">Auto</option>
+            <option value="1080p">1080p</option>
+            <option value="720p">720p</option>
+            <option value="480p">480p</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label>Buffer Size</label>
+          <select id="bufferSize">
+            <option value="10">Small (10s)</option>
+            <option value="30" selected>Medium (30s)</option>
+            <option value="60">Large (60s)</option>
+          </select>
+        </div>
+        <button class="btn-danger" onclick="clearAllData()" style="width:100%;margin-top:20px">
+          <i class="fa-solid fa-trash"></i> Clear All Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.10.0/dist/videojs-http-streaming.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
