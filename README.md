@@ -1,4 +1,4 @@
-# MK-IPTV-Player-Pro
+
 
 # MK IPTV Player Pro
 
@@ -17,7 +17,7 @@ Free M3U/M3U8 IPTV player with audio switching, VLC mode, and multi-playlist sup
 1. Create repo `mk-iptv-player`
 2. Upload all files
 3. Settings → Pages → Deploy from `main` branch
-4. Done! `https://username.github.io/mk-iptv-player`
+4. Done! `https://otctech3-commits.github.io/mk-iptv-player`
 
 ## Usage
 1. Click "Add Playlist" 
@@ -38,10 +38,10 @@ No copyrighted content is included or distributed.
 
 Made with ❤️ by MK BOTS
 
-##REPO STRUCTURE
+## STRUCTURE
 
-mk-iptv-player/
+'mk-iptv-player/
 ├── index.html
 ├── style.css
 ├── app.js
-└── README.md
+└── README.md'
